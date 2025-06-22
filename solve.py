@@ -3,7 +3,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import combinations
+import time
 from constellations import CONSTELLATIONS
+THRESHOLD = 0.7
 
 # Load data sky
 sky = np.load('sky.npy', allow_pickle=True)
@@ -30,17 +32,25 @@ def is_match(candidate, pattern, tolerance=0.7):
 # Search function
 def search_constellation(sky, pattern, tolerance=0.7):
     matches = []
+    total_checked = 0
     for candidate in combinations(sky, len(pattern)):
+        total_checked += 1
         if is_match(candidate, pattern, tolerance):
             matches.append(candidate)
+    print(f"Total combinations checked: {total_checked}")
     return matches
 
-# Solve all
+start_time = time.time()
+
 results = {}
 for name, pattern in CONSTELLATIONS.items():
-    matches = search_constellation(sky, pattern)
+    matches = search_constellation(sky, pattern, tolerance=THRESHOLD)
     results[name] = matches
     print(f"{name} found: {len(matches)} matches")
+
+end_time = time.time()
+print(f"Execution time: {end_time - start_time:.2f} seconds")
+print(f"Threshold tolerance: {THRESHOLD}")
 
 # Visualize
 xs, ys = zip(*sky)
