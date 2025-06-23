@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import random
 from constellations import CONSTELLATIONS
 
-def generate_sky(num_stars, xrange=(0, 100), yrange=(0, 100)):
+def generate_sky(num_stars, xrange=(0, 200), yrange=(0, 200)):
     xs = np.random.uniform(xrange[0], xrange[1], num_stars)
     ys = np.random.uniform(yrange[0], yrange[1], num_stars)
     sky = list(zip(xs, ys))
@@ -27,9 +27,9 @@ def generate_full_sky(num_stars, num_injected_constellations):
     selected_constellations = available_constellations[:num_injected_constellations]
 
     for name, pattern in selected_constellations:
-        insert_x = random.uniform(10, 90)
-        insert_y = random.uniform(10, 90)
-        scale = random.uniform(3, 8)  # Random scale biar variasi ukuran
+        insert_x = random.uniform(20, 180)
+        insert_y = random.uniform(20, 180)
+        scale = random.uniform(5, 7) 
 
         sky, translated_pattern = insert_constellation(sky, pattern, (insert_x, insert_y), scale)
         injected_info.append({
@@ -61,7 +61,7 @@ def visualize(sky, injected_info):
 
 # Main
 if __name__ == "__main__":
-    NUM_RANDOM_STARS = 200
+    NUM_RANDOM_STARS = 150
     NUM_INJECTED_CONSTELLATIONS = 4
 
     sky, injected_info = generate_full_sky(NUM_RANDOM_STARS, NUM_INJECTED_CONSTELLATIONS)
