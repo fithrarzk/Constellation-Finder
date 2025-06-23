@@ -7,12 +7,11 @@ import math
 from constellations import CONSTELLATIONS
 from sklearn.cluster import DBSCAN
 
-# Hyperparameters
-BASE_TOLERANCE = 0.18
-ANCHOR_TOLERANCE = 0.3
-EPS_CLUSTER = 25
+# Hyperparameters (Final Ultimate Ultimate)
+BASE_TOLERANCE = 0.05   # RMS error tolerance (scale-invariant)
+EPS_CLUSTER = 15        # DBSCAN clustering radius
 MIN_SAMPLES = 2
-MAX_SAMPLE_PER_CLUSTER = 30000  # aman sampling per cluster
+MAX_SAMPLE_PER_CLUSTER = 40000
 
 # Load sky data
 sky = np.load('sky.npy', allow_pickle=True)
@@ -26,16 +25,19 @@ def compute_normalized_distances(points):
     for i in range(len(points)):
         for j in range(i+1, len(points)):
             dists.append(euclidean_distance(points[i], points[j]))
-    max_dist = max(dists)
-    normalized = [d / max_dist for d in dists]
+    avg_dist = sum(dists) / len(dists)
+    normalized = [d / avg_dist for d in dists]
     return sorted(normalized)
 
-def is_match(candidate, pattern):
+def rms_shape_error(candidate, pattern):
     candidate_norm = compute_normalized_distances(candidate)
     pattern_norm = compute_normalized_distances(pattern)
     diff = [(c - p) for c, p in zip(candidate_norm, pattern_norm)]
     rms_error = np.sqrt(sum(d**2 for d in diff) / len(diff))
-    return rms_error < BASE_TOLERANCE
+    return rms_error
+
+def is_match(candidate, pattern):
+    return rms_shape_error(candidate, pattern) < BASE_TOLERANCE
 
 def cluster_sky(sky, eps=EPS_CLUSTER, min_samples=MIN_SAMPLES):
     coords = np.array(sky)
@@ -53,7 +55,6 @@ def random_sample_combinations(cluster_points, pattern_size, sample_size):
     total_possible = math.comb(len(all_points), pattern_size)
     if total_possible <= sample_size:
         return list(combinations(all_points, pattern_size))
-    
     selected = set()
     while len(selected) < sample_size:
         candidate = tuple(sorted(random.sample(all_points, pattern_size)))
@@ -63,13 +64,7 @@ def random_sample_combinations(cluster_points, pattern_size, sample_size):
 def search_in_cluster(cluster_points, pattern):
     matches = []
     sampled_candidates = random_sample_combinations(cluster_points, len(pattern), MAX_SAMPLE_PER_CLUSTER)
-
-    pattern_anchor_dist = euclidean_distance(pattern[0], pattern[1])
-
     for candidate in sampled_candidates:
-        candidate_anchor_dist = euclidean_distance(candidate[0], candidate[1])
-        if abs(candidate_anchor_dist - pattern_anchor_dist) > ANCHOR_TOLERANCE * pattern_anchor_dist:
-            continue
         if is_match(candidate, pattern):
             matches.append(candidate)
     return matches
@@ -98,8 +93,7 @@ for name, pattern in CONSTELLATIONS.items():
 end_time = time.time()
 print(f"\nExecution time: {end_time - start_time:.2f} seconds")
 
-# Visualization Improvement
-
+# Visualization: Only best match for each constellation
 xs, ys = zip(*sky)
 plt.scatter(xs, ys, color='white', s=10)
 plt.gca().set_facecolor('black')
@@ -107,17 +101,12 @@ plt.gca().set_facecolor('black')
 for constellation_name, matches in results.items():
     if not matches:
         continue
-    # Pick best match (smallest RMS error)
-    best = min(matches, key=lambda m: np.sqrt(
-        sum((c - p)**2 for c, p in zip(compute_normalized_distances(m), compute_normalized_distances(CONSTELLATIONS[constellation_name]))) / len(m)
-    ))
-    
+    best = min(matches, key=lambda m: rms_shape_error(m, CONSTELLATIONS[constellation_name]))
     mx, my = zip(*best)
-    plt.scatter(mx, my, s=30, label=constellation_name)
+    plt.scatter(mx, my, s=40, label=constellation_name)
     plt.plot(mx + (mx[0],), my + (my[0],), linewidth=2)
     plt.text(np.mean(mx), np.mean(my), constellation_name, fontsize=8, color='cyan')
 
-plt.title("Detected Constellations (Best Matches Only)")
+plt.title("Detected Constellations (FINAL Ultimate Brute Force Matching)")
 plt.legend()
 plt.show()
-
