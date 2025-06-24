@@ -87,6 +87,9 @@ These parameters can be modified directly in the `solve.py` file for experimenta
 * DBSCAN is used to reduce search complexity without sacrificing exhaustive search within relevant clusters.
 * This program is suitable for small to medium-scale data, aligned with the research design.
 
+## Video
+https://youtu.be/VQr0EZB6s80
+
 ## Author
 
-This program was developed as part of an Algorithm Strategy Paper Project by \[Your Name].
+This program was developed as part of an Algorithm Strategy Paper Project by \Muhammad Fithra Rizki.
