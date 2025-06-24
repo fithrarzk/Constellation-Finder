@@ -7,7 +7,6 @@ import math
 from constellations import CONSTELLATIONS
 from sklearn.cluster import DBSCAN
 
-# Hyperparameters (Final Ultimate Ultimate)
 BASE_TOLERANCE = 0.05   # RMS error tolerance (scale-invariant)
 EPS_CLUSTER = 15        # DBSCAN clustering radius
 MIN_SAMPLES = 2
